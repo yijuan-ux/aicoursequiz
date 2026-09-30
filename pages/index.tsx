@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ValidationError, useForm } from "@formspree/react";
 
 type CourseKey = "B" | "P" | "F";
 
@@ -77,11 +78,40 @@ const results = {
   },
 };
 
+function LeadForm({ course, onSuccess }: { course: string; onSuccess: () => void }) {
+  const [state, handleSubmit] = useForm("mqpajlwg");
+
+  useEffect(() => {
+    if (state.succeeded) onSuccess();
+  }, [state.succeeded, onSuccess]);
+
+  return (
+    <form onSubmit={handleSubmit} className="leadForm">
+      <p className="eyebrow">YOUR MATCH IS READY</p>
+      <h2>Where should we send it?</h2>
+      <input type="hidden" name="matchedCourse" value={course} />
+      <label>First name<input name="firstName" autoComplete="given-name" required /></label>
+      <ValidationError prefix="First name" field="firstName" errors={state.errors} />
+      <label>Last name<input name="lastName" autoComplete="family-name" required /></label>
+      <ValidationError prefix="Last name" field="lastName" errors={state.errors} />
+      <label>Singapore mobile<input name="phone" type="tel" inputMode="numeric" autoComplete="tel" pattern="[89][0-9]{3} ?[0-9]{4}" placeholder="9123 4567" required /></label>
+      <ValidationError prefix="Mobile" field="phone" errors={state.errors} />
+      <label>Email<input name="email" type="email" autoComplete="email" required /></label>
+      <ValidationError prefix="Email" field="email" errors={state.errors} />
+      <label className="consent"><input name="consent" type="checkbox" required /> I agree that Breakthrough Academy and Architects Of Life may send course information by email or WhatsApp.</label>
+      <ValidationError prefix="Consent" field="consent" errors={state.errors} />
+      <ValidationError errors={state.errors} />
+      <button className="primary" type="submit" disabled={state.submitting}>{state.submitting ? "Sending…" : "Reveal My Result"}</button>
+    </form>
+  );
+}
+
 export default function QuizPage() {
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
   const [scores, setScores] = useState<Record<CourseKey, number>>({ B: 0, P: 0, F: 0 });
   const [complete, setComplete] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
 
   const answer = (type: CourseKey) => {
     const nextScores = { ...scores, [type]: scores[type] + (index === questions.length - 1 ? 2 : 1) };
@@ -109,6 +139,8 @@ export default function QuizPage() {
                 <div className="chips"><span>🌱 1-Day Gen AI</span><span>⚡ 1-Day Productivity</span><span>🎯 3-Day Sales</span></div>
                 <button className="primary" onClick={() => setStarted(true)}>Start the Quiz</button>
               </>
+            ) : complete && !leadSubmitted ? (
+              <LeadForm course={match.course} onSuccess={() => setLeadSubmitted(true)} />
             ) : complete ? (
               <>
                 <p className="eyebrow">YOUR MATCH</p>
@@ -117,7 +149,7 @@ export default function QuizPage() {
                 <p className="course">{match.course}</p>
                 <p>{match.blurb}</p>
                 <a className="primary link" href={match.href} target="_blank" rel="noreferrer">Read Course Details</a>
-                <button className="secondary" onClick={() => { setStarted(false); setComplete(false); setIndex(0); setScores({ B: 0, P: 0, F: 0 }); }}>Take the quiz again</button>
+                <button className="secondary" onClick={() => { setStarted(false); setComplete(false); setLeadSubmitted(false); setIndex(0); setScores({ B: 0, P: 0, F: 0 }); }}>Take the quiz again</button>
               </>
             ) : (
               <>
@@ -134,7 +166,7 @@ export default function QuizPage() {
       </div>
       <style jsx>{`
         main { min-height: 100vh; display:flex; justify-content:center; align-items:center; padding:32px 16px; background:radial-gradient(circle at 20% 0%,#1f1c3d,#15132b 60%); color:#fff7ea; font-family:Inter,system-ui,sans-serif; }
-        .stage { width:100%; max-width:460px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:24px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:14px;background:repeating-linear-gradient(115deg,#ff6b5b 0 26px,#f5b324 26px 52px,#7c5cfc 52px 78px)}.panel{padding:34px 28px 30px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:14px;padding:15px;border:0;font-size:15px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:500}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}@media(max-width:380px){.panel{padding:28px 20px 24px}}
+        .stage { width:100%; max-width:460px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:24px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:14px;background:repeating-linear-gradient(115deg,#ff6b5b 0 26px,#f5b324 26px 52px,#7c5cfc 52px 78px)}.panel{padding:34px 28px 30px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:14px;padding:15px;border:0;font-size:15px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:500}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}.leadForm{display:grid;gap:12px}.leadForm label{display:grid;gap:5px;font-size:13px;font-weight:700;color:#5b5478}.leadForm input{border:2px solid #e3dcd2;border-radius:10px;padding:11px;font:inherit;color:#241f3d}.leadForm .consent{display:flex;align-items:flex-start;gap:8px;font-weight:500;line-height:1.4}.leadForm .consent input{margin-top:2px}.leadForm .form-error{font-size:13px;color:#b42318}@media(max-width:380px){.panel{padding:28px 20px 24px}}
       `}</style>
     </main>
   );
