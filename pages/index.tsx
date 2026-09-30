@@ -90,7 +90,7 @@ function LeadForm({ course, onSuccess }: { course: string; onSuccess: () => void
       <div className="leadIntro">
         <div className="leadEmoji">🎉</div>
         <h1>Your match is ready!</h1>
-        <p>Tell us where to reach you, then we&apos;ll reveal your result.</p>
+        <p>Your AI match is almost here! 🤖✨<br />Just drop us your details and we&apos;ll reveal which AI course fits you best.</p>
       </div>
       <input type="hidden" name="matchedCourse" value={course} />
       <div className="nameFields">
@@ -99,7 +99,7 @@ function LeadForm({ course, onSuccess }: { course: string; onSuccess: () => void
       </div>
       <div className="formField"><label htmlFor="phone">Phone</label><input id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" pattern="[89][0-9]{3} ?[0-9]{4}" placeholder="e.g. 9123 4567" required /><ValidationError prefix="Phone" field="phone" errors={state.errors} /></div>
       <div className="formField"><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" required /><ValidationError prefix="Email" field="email" errors={state.errors} /></div>
-      <label className="consent"><input name="consent" type="checkbox" required /> <span>By continuing, you agree that Breakthrough AI may contact you about this course.</span></label>
+      <label className="consent"><input name="consent" type="checkbox" required /> <span>PDPA: I agree that Breakthrough Academy &amp; Architects Of Life may send course information through email and/or WhatsApp messages.</span></label>
       <ValidationError prefix="Consent" field="consent" errors={state.errors} />
       <ValidationError errors={state.errors} />
       <button className="primary" type="submit" disabled={state.submitting}>{state.submitting ? "Sending…" : "Reveal My Result"}</button>
