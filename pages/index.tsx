@@ -80,29 +80,63 @@ const results = {
 
 function LeadForm({ course, onSuccess }: { course: string; onSuccess: () => void }) {
   const [state, handleSubmit] = useForm("mqpajlwg");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (state.succeeded) onSuccess();
   }, [state.succeeded, onSuccess]);
 
+  const validate = (form: HTMLFormElement) => {
+    const values = new FormData(form);
+    const firstName = String(values.get("first_name") || "").trim();
+    const lastName = String(values.get("last_name") || "").trim();
+    const phone = String(values.get("phone") || "").replace(/[\s\-()]/g, "").replace(/^(\+?65)/, "");
+    const email = String(values.get("email") || "").trim();
+    const next: Record<string, string> = {};
+    if (!firstName) next.first_name = "Please enter your first name";
+    if (!lastName) next.last_name = "Please enter your last name";
+    if (!/^[3689]\d{7}$/.test(phone)) next.phone = "Please enter a valid phone number";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) next.email = "Please enter a valid email";
+    if (!values.get("consent")) next.consent = "Please tick the box to continue";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    if (!validate(event.currentTarget)) {
+      event.preventDefault();
+      event.currentTarget.querySelector<HTMLInputElement>(".invalid input, .invalid input[type=checkbox]")?.focus();
+      return;
+    }
+    handleSubmit(event);
+  };
+
+  const field = (name: string) => ({
+    className: `field ${errors[name] ? "invalid" : ""}`,
+    onBlur: (event: React.FocusEvent<HTMLInputElement>) => validate(event.currentTarget.form!),
+  });
+
   return (
-    <form onSubmit={handleSubmit} className="leadForm">
+    <form onSubmit={submit} className="leadForm" noValidate>
       <div className="leadIntro">
         <div className="leadEmoji">🎉</div>
-        <h1>Your match is ready!</h1>
-        <p>Your AI match is almost here! 🤖✨<br />Just drop us your details and we&apos;ll reveal which AI course fits you best.</p>
+        <h1>Your AI match is almost here! <span aria-hidden="true">🤖✨</span></h1>
+        <p>Just drop us your details and we&apos;ll reveal which AI course fits you best.</p>
       </div>
       <input type="hidden" name="matchedCourse" value={course} />
+      <input type="hidden" name="source" value="Breakthrough AI — Course Match Quiz" />
+      <input type="hidden" name="_subject" value="New Breakthrough AI course match lead" />
+      <input className="honeypot" type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" />
       <div className="nameFields">
-        <div><label htmlFor="firstName">First name</label><input id="firstName" name="firstName" autoComplete="given-name" required /><ValidationError prefix="First name" field="firstName" errors={state.errors} /></div>
-        <div><label htmlFor="lastName">Last name</label><input id="lastName" name="lastName" autoComplete="family-name" required /><ValidationError prefix="Last name" field="lastName" errors={state.errors} /></div>
+        <div {...field("first_name")}><label htmlFor="firstName">First name</label><input id="firstName" name="first_name" autoComplete="given-name" /><span className="error">{errors.first_name}</span></div>
+        <div {...field("last_name")}><label htmlFor="lastName">Last name</label><input id="lastName" name="last_name" autoComplete="family-name" /><span className="error">{errors.last_name}</span></div>
       </div>
-      <div className="formField"><label htmlFor="phone">Phone</label><input id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" pattern="[89][0-9]{3} ?[0-9]{4}" placeholder="e.g. 9123 4567" required /><ValidationError prefix="Phone" field="phone" errors={state.errors} /></div>
-      <div className="formField"><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" required /><ValidationError prefix="Email" field="email" errors={state.errors} /></div>
-      <label className="consent"><input name="consent" type="checkbox" required /> <span>PDPA: I agree that Breakthrough Academy &amp; Architects Of Life may send course information through email and/or WhatsApp messages.</span></label>
-      <ValidationError prefix="Consent" field="consent" errors={state.errors} />
+      <div {...field("phone")}><label htmlFor="phone">Phone</label><input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="e.g. 9123 4567" /><span className="error">{errors.phone}</span></div>
+      <div {...field("email")}><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" /><span className="error">{errors.email}</span></div>
+      <div className={`consent ${errors.consent ? "invalid" : ""}`}><input id="consent" name="consent" type="checkbox" value="Yes" onChange={(event) => validate(event.currentTarget.form!)} /><label htmlFor="consent">PDPA: By continuing, you agree that Breakthrough Academy &amp; Architects Of Life may send you course details through email and/or WhatsApp messages.</label></div>
+      <span className="error consentError">{errors.consent}</span>
       <ValidationError errors={state.errors} />
-      <button className="primary" type="submit" disabled={state.submitting}>{state.submitting ? "Sending…" : "Reveal My Result"}</button>
+      <button className="primary" type="submit" disabled={state.submitting}>{state.submitting ? "Revealing…" : "Reveal My Result"}</button>
     </form>
   );
 }
@@ -167,7 +201,7 @@ export default function QuizPage() {
       </div>
       <style jsx>{`
         main { min-height: 100vh; display:flex; justify-content:center; align-items:center; padding:32px 16px; background:radial-gradient(circle at 20% 0%,#1f1c3d,#15132b 60%); color:#fff7ea; font-family:Inter,system-ui,sans-serif; }
-        .stage { width:100%; max-width:920px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:32px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:28px;background:repeating-linear-gradient(115deg,#ff6b5b 0 38px,#f5b324 38px 76px,#7c5cfc 76px 114px)}.panel{padding:52px 56px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:18px;padding:17px;border:0;font-size:18px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white;box-shadow:0 12px 24px -12px #5f43d1}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:500}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}.leadForm{display:grid;gap:24px}.leadIntro{margin-bottom:12px}.leadEmoji{font-size:56px;line-height:1}.leadIntro h1{font-size:36px;margin:18px 0 18px}.leadIntro p{font-size:19px;margin:0}.leadForm label{display:block;margin-bottom:10px;font-size:17px;font-weight:700;color:#5b5478}.leadForm input{box-sizing:border-box;width:100%;border:4px solid #ff6b5b;border-radius:22px;padding:20px;font:inherit;font-size:20px;color:#241f3d;background:#fff}.nameFields{display:grid;grid-template-columns:1fr 1fr;gap:20px}.leadForm .consent{display:flex;align-items:flex-start;gap:10px;font-size:16px;font-weight:500;line-height:1.5}.leadForm .consent input{width:20px;height:20px;margin:3px 0 0;accent-color:#7c5cfc}.leadForm .form-error{font-size:14px;color:#b42318;margin-top:6px}@media(max-width:600px){main{padding:20px 12px}.stage{max-width:100%}.panel{padding:34px 26px}.awning{height:18px}.leadIntro h1{font-size:29px}.leadIntro p{font-size:17px}.nameFields{grid-template-columns:1fr;gap:18px}.leadForm{gap:18px}.leadForm input{padding:16px;font-size:18px}}
+        .stage { width:100%; max-width:920px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:32px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:28px;background:repeating-linear-gradient(115deg,#ff6b5b 0 38px,#f5b324 38px 76px,#7c5cfc 76px 114px)}.panel{padding:52px 56px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:18px;padding:17px;border:0;font-size:18px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white;box-shadow:0 12px 24px -12px #5f43d1}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:500}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}.leadForm{display:grid;gap:22px}.leadIntro{margin-bottom:4px}.leadEmoji{font-size:54px;line-height:1;margin-bottom:14px}.leadIntro h1{font-size:40px;margin:0 0 12px}.leadIntro p{font-size:20px;margin:0}.leadForm label{display:block;margin-bottom:10px;font-size:18px;font-weight:700;color:#55598a}.leadForm input:not([type=checkbox]){box-sizing:border-box;width:100%;height:60px;border:2px solid #ddd6ea;border-radius:20px;padding:0 22px;font:500 19px Inter,system-ui,sans-serif;color:#14163a;background:#fff}.leadForm input:focus{outline:none;border-color:#6c4cf5;box-shadow:0 0 0 4px rgba(108,76,245,.18)}.nameFields{display:grid;grid-template-columns:1fr 1fr;gap:20px}.field.invalid input,.leadForm .invalid input:not([type=checkbox]){border-color:#ff6b5e}.error{display:none;color:#e5322d;font-size:18px;margin-top:10px}.invalid .error,.consentError:not(:empty){display:block}.leadForm .consent{display:flex;align-items:flex-start;gap:16px;margin:4px 0 0}.leadForm .consent input{appearance:none;flex:none;width:34px;height:34px;margin:2px 0 0;border:3px solid #6c4cf5;border-radius:9px;background:transparent;cursor:pointer;display:grid;place-content:center}.leadForm .consent input:checked{background:#6c4cf5}.leadForm .consent input:checked::after{content:"✓";color:#fff;font-size:22px;font-weight:700}.leadForm .consent label{font-weight:500;font-size:18px;line-height:1.5;color:#2b2f7a;margin:0}.leadForm .consent.invalid input{border-color:#ff6b5e}.consentError{margin:-14px 0 0 50px}.honeypot{position:absolute;left:-9999px;height:0;width:0;opacity:0}.leadForm .primary{height:76px;margin-top:0;border-radius:28px;font-family:"Trebuchet MS",sans-serif;font-size:27px;box-shadow:0 14px 30px rgba(108,76,245,.35)}@media(max-width:600px){main{padding:20px 12px}.stage{max-width:100%}.panel{padding:34px 26px}.awning{height:18px}.leadIntro h1{font-size:30px}.leadIntro p{font-size:17px}.nameFields{grid-template-columns:1fr;gap:0}.leadForm{gap:18px}.leadForm input:not([type=checkbox]){height:54px;font-size:17px;border-radius:16px}.leadForm .consent label{font-size:15px}.leadForm .consent input{width:30px;height:30px}.leadForm .primary{height:64px;border-radius:22px;font-size:22px}.error{font-size:15px}}
       `}</style>
     </main>
   );
