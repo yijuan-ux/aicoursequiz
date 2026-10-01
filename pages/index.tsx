@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ValidationError, useForm } from "@formspree/react";
+import { useState } from "react";
+import Script from "next/script";
 
 type CourseKey = "B" | "P" | "F";
 
@@ -78,76 +78,30 @@ const results = {
   },
 };
 
-function LeadForm({ course, onSuccess }: { course: string; onSuccess: () => void }) {
-  const [state, handleSubmit] = useForm("mqpajlwg");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (state.succeeded) onSuccess();
-  }, [state.succeeded, onSuccess]);
-
-  const validate = (form: HTMLFormElement) => {
-    const values = new FormData(form);
-    const firstName = String(values.get("first_name") || "").trim();
-    const lastName = String(values.get("last_name") || "").trim();
-    const phone = String(values.get("phone") || "").replace(/[\s\-()]/g, "").replace(/^(\+?65)/, "");
-    const email = String(values.get("email") || "").trim();
-    const next: Record<string, string> = {};
-    if (!firstName) next.first_name = "Please enter your first name";
-    if (!lastName) next.last_name = "Please enter your last name";
-    if (!/^[3689]\d{7}$/.test(phone)) next.phone = "Please enter a valid phone number";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) next.email = "Please enter a valid email";
-    if (!values.get("consent")) next.consent = "Please tick the box to continue";
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
-
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (!validate(event.currentTarget)) {
-      event.preventDefault();
-      event.currentTarget.querySelector<HTMLInputElement>(".invalid input, .invalid input[type=checkbox]")?.focus();
-      return;
-    }
-    handleSubmit(event);
-  };
-
-  const validateField = (name: string, value: string) => {
-    const phone = value.replace(/[\s\-()]/g, "").replace(/^(\+?65)/, "");
-    const message = name === "first_name" ? (!value.trim() ? "Please enter your first name" : "")
-      : name === "last_name" ? (!value.trim() ? "Please enter your last name" : "")
-      : name === "phone" ? (!/^[3689]\d{7}$/.test(phone) ? "Please enter a valid phone number" : "")
-      : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim()) ? "Please enter a valid email" : "";
-    setErrors((current) => ({ ...current, [name]: message }));
-  };
-
-  const field = (name: string) => ({ className: `field ${errors[name] ? "invalid" : ""}` });
-  const inputHandlers = (name: string) => ({
-    onBlur: (event: React.FocusEvent<HTMLInputElement>) => { if (event.currentTarget.value) validateField(name, event.currentTarget.value); },
-    onInput: (event: React.FormEvent<HTMLInputElement>) => { if (errors[name]) validateField(name, event.currentTarget.value); },
-  });
-
+function LeadForm() {
   return (
-    <form onSubmit={submit} className="leadForm" noValidate>
-      <div className="leadIntro">
-        <div className="leadEmoji">🎉</div>
-        <h1>Your AI match is almost here! <span aria-hidden="true">🤖✨</span></h1>
-        <p>Just drop us your details and we&apos;ll reveal which AI course fits you best.</p>
-      </div>
-      <input type="hidden" name="matchedCourse" value={course} />
-      <input type="hidden" name="source" value="Breakthrough AI — Course Match Quiz" />
-      <input type="hidden" name="_subject" value="New Breakthrough AI course match lead" />
-      <input className="honeypot" type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" />
-      <div className="nameFields">
-        <div {...field("first_name")}><label htmlFor="firstName">First name</label><input id="firstName" name="first_name" autoComplete="given-name" {...inputHandlers("first_name")} /><span className="error">{errors.first_name}</span></div>
-        <div {...field("last_name")}><label htmlFor="lastName">Last name</label><input id="lastName" name="last_name" autoComplete="family-name" {...inputHandlers("last_name")} /><span className="error">{errors.last_name}</span></div>
-      </div>
-      <div {...field("phone")}><label htmlFor="phone">Phone</label><input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="e.g. 9123 4567" {...inputHandlers("phone")} /><span className="error">{errors.phone}</span></div>
-      <div {...field("email")}><label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" {...inputHandlers("email")} /><span className="error">{errors.email}</span></div>
-      <div className={`consent ${errors.consent ? "invalid" : ""}`}><input id="consent" name="consent" type="checkbox" value="Yes" onChange={(event) => validate(event.currentTarget.form!)} /><label htmlFor="consent">PDPA: By continuing, you agree that Breakthrough Academy &amp; Architects Of Life may send you course details through email and/or WhatsApp messages.</label></div>
-      <span className="error consentError">{errors.consent}</span>
-      <ValidationError errors={state.errors} />
-      <button className="primary" type="submit" disabled={state.submitting}>{state.submitting ? "Revealing…" : "Reveal My Result"}</button>
-    </form>
+    <div className="embeddedLeadForm">
+      <iframe
+        src="https://link.salesprocess.com/widget/form/rvbhfiB5qIAX6jM4tGW9"
+        style={{ width: "100%", height: "727px", border: "none", borderRadius: "3px" }}
+        id="inline-rvbhfiB5qIAX6jM4tGW9"
+        data-layout='{"id":"INLINE"}'
+        data-trigger-type="alwaysShow"
+        data-trigger-value=""
+        data-activation-type="alwaysActivated"
+        data-activation-value=""
+        data-deactivation-type="neverDeactivate"
+        data-deactivation-value=""
+        data-form-name="QD AI Productivity - Self"
+        data-height="727"
+        data-layout-iframe-id="inline-rvbhfiB5qIAX6jM4tGW9"
+        data-form-id="rvbhfiB5qIAX6jM4tGW9"
+        data-cookie-consent="true"
+        data-cookie-consent-provider="auto"
+        title="QD AI Productivity - Self"
+      />
+      <Script src="https://link.salesprocess.com/js/form_embed.js" strategy="afterInteractive" />
+    </div>
   );
 }
 
@@ -156,7 +110,6 @@ export default function QuizPage() {
   const [index, setIndex] = useState(0);
   const [scores, setScores] = useState<Record<CourseKey, number>>({ B: 0, P: 0, F: 0 });
   const [complete, setComplete] = useState(false);
-  const [leadSubmitted, setLeadSubmitted] = useState(false);
 
   const answer = (type: CourseKey) => {
     const nextScores = { ...scores, [type]: scores[type] + (index === questions.length - 1 ? 2 : 1) };
@@ -164,10 +117,6 @@ export default function QuizPage() {
     if (index === questions.length - 1) setComplete(true);
     else setIndex(index + 1);
   };
-
-  const result = (Object.keys(scores) as CourseKey[]).reduce((best, key) =>
-    scores[key] > scores[best] ? key : best, "B");
-  const match = results[result];
 
   return (
     <main>
@@ -184,18 +133,8 @@ export default function QuizPage() {
                 <div className="chips"><span>🌱 1-Day Gen AI</span><span>⚡ 1-Day Productivity</span><span>🎯 3-Day Sales</span></div>
                 <button className="primary" onClick={() => setStarted(true)}>Start the Quiz</button>
               </>
-            ) : complete && !leadSubmitted ? (
-              <LeadForm course={match.course} onSuccess={() => setLeadSubmitted(true)} />
             ) : complete ? (
-              <>
-                <p className="eyebrow">YOUR MATCH</p>
-                <div className="resultEmoji">{match.emoji}</div>
-                <h1>{match.name}</h1>
-                <p className="course">{match.course}</p>
-                <p>{match.blurb}</p>
-                <a className="primary link" href={match.href} target="_blank" rel="noreferrer">Read Course Details</a>
-                <button className="secondary" onClick={() => { setStarted(false); setComplete(false); setLeadSubmitted(false); setIndex(0); setScores({ B: 0, P: 0, F: 0 }); }}>Take the quiz again</button>
-              </>
+              <LeadForm />
             ) : (
               <>
                 <div className="meta"><span>Question {index + 1} of {questions.length}</span><span>{questions.map((_, i) => <i key={i} className={i === index ? "current" : i < index ? "done" : ""} />)}</span></div>
