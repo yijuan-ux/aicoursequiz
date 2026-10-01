@@ -1,4 +1,5 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
+import Script from "next/script";
 
 type CourseKey = "B" | "P" | "F";
 
@@ -19,39 +20,22 @@ const results: Record<CourseKey, Result> = {
   F: { emoji: "🎯", name: "The Funnel Boss", course: "3-Day Customer Journey Mapping — Full Sales Funnel Automation", href: "https://ai.theqdacademy.com/cjm", blurb: "Map your customer journey and build AI automation from lead capture to close." },
 };
 
-function LeadForm({ match, onSuccess }: { match: CourseKey; onSuccess: () => void }) {
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const result = results[match];
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitting(true); setError("");
-    const form = new FormData(event.currentTarget);
-    const response = await fetch("/api/leads", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ firstName: form.get("firstName"), lastName: form.get("lastName"), phone: form.get("phone"), email: form.get("email"), consent: form.get("consent") === "on", course: result.course, match: result.name }) });
-    if (response.ok) onSuccess();
-    else { const data = await response.json().catch(() => ({})); setError(data.error || "Something went wrong. Please try again."); setSubmitting(false); }
-  }
-
-  return <form className="leadForm" onSubmit={submit}>
-    <div className="leadEmoji">🎉</div><h1>Your AI match is almost here! 🤖✨</h1><p>Just drop us your details and we&apos;ll reveal which AI course fits you best.</p>
-    <div className="nameFields"><label>First name<input name="firstName" autoComplete="given-name" required /></label><label>Last name<input name="lastName" autoComplete="family-name" required /></label></div>
-    <label>Phone<input name="phone" type="tel" autoComplete="tel" placeholder="e.g. 9123 4567" required /></label>
-    <label>Email<input name="email" type="email" autoComplete="email" required /></label>
-    <label className="consent"><input name="consent" type="checkbox" required /><span>PDPA: I agree that Breakthrough Academy &amp; Architects Of Life may send course information through email and/or WhatsApp messages.</span></label>
-    {error && <p className="error" role="alert">{error}</p>}<button className="primary" disabled={submitting}>{submitting ? "Saving…" : "Reveal My Result"}</button>
-  </form>;
+function LeadForm({ match }: { match: CourseKey }) {
+  if (typeof window !== "undefined") window.sessionStorage.setItem("ai-course-quiz-match", match);
+  return <div className="embeddedLeadForm">
+    <iframe src="https://link.salesprocess.com/widget/form/rTA9UNAFs4mOMkzdpNdq" style={{ width: "100%", height: "600px", border: "none", borderRadius: "3px" }} id="inline-rTA9UNAFs4mOMkzdpNdq" data-layout='{"id":"INLINE"}' data-trigger-type="alwaysShow" data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value="" data-deactivation-type="neverDeactivate" data-deactivation-value="" data-form-name="AI Quiz" data-height="600" data-layout-iframe-id="inline-rTA9UNAFs4mOMkzdpNdq" data-form-id="rTA9UNAFs4mOMkzdpNdq" data-cookie-consent="true" data-cookie-consent-provider="auto" title="AI Quiz" />
+    <Script src="https://link.salesprocess.com/js/form_embed.js" strategy="afterInteractive" />
+  </div>;
 }
 
 export default function QuizPage() {
-  const [started, setStarted] = useState(false); const [index, setIndex] = useState(0); const [scores, setScores] = useState<Record<CourseKey, number>>({ B: 0, P: 0, F: 0 }); const [submitted, setSubmitted] = useState(false);
+  const [started, setStarted] = useState(false); const [index, setIndex] = useState(0); const [scores, setScores] = useState<Record<CourseKey, number>>({ B: 0, P: 0, F: 0 });
   const answer = (type: CourseKey) => { setScores((current) => ({ ...current, [type]: current[type] + (index === questions.length - 1 ? 2 : 1) })); if (index === questions.length - 1) setIndex(questions.length); else setIndex(index + 1); };
   const match = (Object.keys(scores) as CourseKey[]).reduce((best, key) => scores[key] > scores[best] ? key : best, "B"); const result = results[match];
   return <main><div className="stage"><p className="brand">🤖 BREAKTHROUGH AI</p><section className="card"><div className="awning" /><div className="panel">
     {!started ? <><div className="emoji">☕🤖</div><h1>Which AI Course Are You, Leh?</h1><p>6 quick questions. Zero jargon. Find the Breakthrough AI course that fits where you are right now.</p><button className="primary" onClick={() => setStarted(true)}>Start the Quiz</button></>
     : index < questions.length ? <><div className="meta">Question {index + 1} of {questions.length}</div><h2>{questions[index].question}</h2><div className="options">{questions[index].options.map((option, optionIndex) => <button key={option.type} onClick={() => answer(option.type)}>{optionIndex + 1}. {option.text}</button>)}</div></>
-    : !submitted ? <LeadForm match={match} onSuccess={() => setSubmitted(true)} />
-    : <><div className="resultEmoji">{result.emoji}</div><p className="eyebrow">YOUR MATCH</p><h1>{result.name}</h1><p className="course">{result.course}</p><p>{result.blurb}</p><a className="primary link" href={result.href} target="_blank" rel="noreferrer">Read Course Details</a></>}
+    : <LeadForm match={match} />}
   </div></section><p className="footer">A fun (but real) way to find your best-fit AI course.</p></div><style jsx>{`
   main{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:32px 16px;background:radial-gradient(circle at 20% 0%,#1f1c3d,#15132b 60%);color:#fff7ea;font-family:Inter,system-ui,sans-serif}.stage{width:100%;max-width:700px}.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:800;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:36px;background:#fdf6ea;color:#14163a;box-shadow:0 24px 60px rgba(0,0,0,.35)}.awning{height:34px;background:repeating-linear-gradient(115deg,#ff6b5e 0 34px,#ffbc32 34px 68px,#6c4cf5 68px 102px)}.panel{padding:26px 52px 52px}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.15}h1{font-size:40px;margin:0 0 12px}h2{font-size:28px}.panel p{font-size:20px;line-height:1.5;color:#55598a}.emoji,.leadEmoji,.resultEmoji{font-size:54px;margin-bottom:14px}.primary,.options button{width:100%;border:0;border-radius:28px;padding:18px;font:800 22px "Trebuchet MS",sans-serif;cursor:pointer}.primary{background:#6c4cf5;color:#fff;box-shadow:0 14px 30px rgba(108,76,245,.35)}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.meta{font-weight:700;color:#55598a;margin-bottom:18px}.options{display:grid;gap:12px}.options button{background:#fff;color:#14163a;border:2px solid #ddd6ea;text-align:left;font:500 17px Inter}.leadForm{display:grid;gap:22px}.leadForm label{display:grid;gap:10px;font-size:18px;font-weight:700;color:#55598a}.leadForm input:not([type=checkbox]){height:60px;border:2px solid #ddd6ea;border-radius:20px;padding:0 22px;font:500 19px Inter}.nameFields{display:grid;grid-template-columns:1fr 1fr;gap:20px}.consent{display:flex!important;grid-template-columns:none!important;align-items:flex-start}.consent input{width:28px;height:28px;margin:0 14px 0 0;accent-color:#6c4cf5}.consent span{font-weight:500;line-height:1.5}.error{color:#e5322d!important;font-size:16px!important;margin:0}.course{font-weight:700;color:#5a3de0!important}.eyebrow{font-size:13px!important;font-weight:800}.footer{font-size:13px!important}@media(max-width:560px){.panel{padding:20px 22px 32px}h1{font-size:30px}.panel p{font-size:17px}.nameFields{grid-template-columns:1fr}.leadForm input:not([type=checkbox]){height:54px;font-size:17px}.primary{font-size:22px}}
   `}</style></main>;
