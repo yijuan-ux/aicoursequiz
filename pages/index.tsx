@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useState } from "react";
 
 type CourseKey = "B" | "P" | "F";
@@ -95,7 +96,13 @@ export default function QuizPage() {
   const match = results[result];
 
   return (
-    <main>
+    <>
+      <Head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet" />
+      </Head>
+      <main>
       <div className="stage">
         <p className="brand">🤖 BREAKTHROUGH AI</p>
         <section className="card">
@@ -132,10 +139,11 @@ export default function QuizPage() {
         </section>
         <p className="footer">A fun (but real) way to find your best-fit AI course.</p>
       </div>
+      </main>
       <style jsx>{`
         main { min-height: 100vh; display:flex; justify-content:center; align-items:center; padding:32px 16px; background:radial-gradient(circle at 20% 0%,#1f1c3d,#15132b 60%); color:#fff7ea; font-family:Inter,system-ui,sans-serif; }
-        .stage { width:100%; max-width:460px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:24px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:14px;background:repeating-linear-gradient(115deg,#ff6b5b 0 26px,#f5b324 26px 52px,#7c5cfc 52px 78px)}.panel{padding:34px 28px 30px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:14px;padding:15px;border:0;font-size:15px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:500}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}@media(max-width:380px){.panel{padding:28px 20px 24px}}
+        .stage { width:100%; max-width:460px; }.brand,.footer{text-align:center;font-size:13px}.brand{color:#f5b324;font-weight:700;letter-spacing:.04em}.footer{color:#bbb5cb;margin-top:18px}.card{overflow:hidden;border-radius:24px;background:#fff7ea;color:#241f3d;box-shadow:0 30px 60px -20px #000}.awning{height:14px;background:repeating-linear-gradient(115deg,#ff6b5b 0 26px,#f5b324 26px 52px,#7c5cfc 52px 78px)}.panel{padding:34px 28px 30px}.emoji,.resultEmoji{font-size:46px}.resultEmoji{margin:8px 0}h1,h2{font-family:"Trebuchet MS",sans-serif;line-height:1.2}h1{font-size:28px;margin:8px 0 12px}h2{font-size:22px;margin:0 0 20px}p{color:#5b5478;line-height:1.55}.course{font-weight:700;color:#5f43d1}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0}.chips span{font-size:12px;font-weight:700;padding:7px 10px;border-radius:999px;background:#f2e9d8}.primary,.secondary,.options button{width:100%;border-radius:14px;padding:15px;border:0;font-size:15px;font-weight:700;cursor:pointer}.primary{background:linear-gradient(135deg,#7c5cfc,#5f43d1);color:white}.link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.secondary{margin-top:10px;color:#241f3d;background:transparent;border:2px solid #ddd4c5}.meta{display:flex;justify-content:space-between;margin-bottom:18px;color:#5b5478;font-size:13px;font-weight:700}.meta i{display:inline-block;width:7px;height:7px;margin-left:6px;border-radius:50%;background:#ddd4c5}.meta i.done{background:#7c5cfc}.meta i.current{background:#ff6b5b}.options{display:grid;gap:10px}.options button{font-family:"Baloo 2",cursive;text-align:left;background:#fff;color:#241f3d;border:2px solid #e3dcd2;font-weight:600}.options button:hover{border-color:#7c5cfc;background:#fbf9ff}.eyebrow{font-size:12px;font-weight:800;margin:0;color:#5b5478}@media(max-width:380px){.panel{padding:28px 20px 24px}}
       `}</style>
-    </main>
+    </>
   );
 }
