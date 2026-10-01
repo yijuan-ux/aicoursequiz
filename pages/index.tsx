@@ -21,7 +21,7 @@ const results: Record<CourseKey, Result> = {
 };
 
 function LeadForm({ match }: { match: CourseKey }) {
-  if (typeof window !== "undefined") window.sessionStorage.setItem("ai-course-quiz-match", match);
+  if (typeof window !== "undefined") window.localStorage.setItem("ai-course-quiz-match", match);
   return <div className="embeddedLeadForm">
     <iframe src="https://link.salesprocess.com/widget/form/rTA9UNAFs4mOMkzdpNdq" style={{ width: "100%", height: "600px", border: "none", borderRadius: "3px" }} id="inline-rTA9UNAFs4mOMkzdpNdq" data-layout='{"id":"INLINE"}' data-trigger-type="alwaysShow" data-trigger-value="" data-activation-type="alwaysActivated" data-activation-value="" data-deactivation-type="neverDeactivate" data-deactivation-value="" data-form-name="AI Quiz" data-height="600" data-layout-iframe-id="inline-rTA9UNAFs4mOMkzdpNdq" data-form-id="rTA9UNAFs4mOMkzdpNdq" data-cookie-consent="true" data-cookie-consent-provider="auto" title="AI Quiz" />
     <Script src="https://link.salesprocess.com/js/form_embed.js" strategy="afterInteractive" />
